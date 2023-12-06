@@ -3,10 +3,10 @@ package com.example.backend.entity.vo.query;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-//注册传过来的请求
+//身份认证时传过来的请求
 @Data
 @AllArgsConstructor
-public class UserRegisterQuery {
+public class UserIdentityQuery {
     private String userName;
-    private String userPwd;
+    private String userMobile;
 }

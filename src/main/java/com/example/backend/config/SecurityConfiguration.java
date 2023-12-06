@@ -1,10 +1,10 @@
 package com.example.backend.config;
 
 import com.example.backend.entity.RestBean;
-import com.example.backend.entity.bean.Account;
+import com.example.backend.entity.bean.Users;
 import com.example.backend.entity.vo.response.AuthorizeVO;
 import com.example.backend.filter.JwtAuthorizeFilter;
-import com.example.backend.service.AccountService;
+import com.example.backend.service.UsersService;
 import com.example.backend.utils.JWTUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.ServletException;
@@ -34,15 +34,16 @@ public class SecurityConfiguration {
     JwtAuthorizeFilter jwtAuthorizeFilter;
 
     @Resource
-    AccountService service;
+    UsersService service;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         return http.authorizeHttpRequests(conf -> conf
-                .requestMatchers("/api/auth/**","/api/user/register").permitAll()
+                .requestMatchers("/api/user/register","/api/user/identity","/api/user/resetPwd").permitAll()
                 .anyRequest().authenticated()
         ).formLogin(conf -> conf
                 .loginProcessingUrl("/api/user/login")
+                        .usernameParameter("userName").passwordParameter("userPwd")
                 .failureHandler(this::onAuthenticationFailure)
                 .successHandler(this::onAuthenticationSuccess)
         ).logout(conf -> conf
@@ -77,13 +78,19 @@ public class SecurityConfiguration {
         response.setContentType("application/json;charset=utf-8");
         //拿到用户详细信息
         User user = (User) authentication.getPrincipal();
-        Account account =  service.findAccountByName(user.getUsername());
-        String token = utils.createJwt( user,account.getId(), account.getUsername());
+        Users users =  service.findAccountByName(user.getUsername());
+        String token = utils.createJwt( user,users.getId(), users.getUserName());
         AuthorizeVO vo = new AuthorizeVO();
-        vo.setExpire(utils.expireTime());
-        vo.setRole(account.getRole());
+        //设置返回的登录成功信息
+        vo.setUsername(users.getUserName());
         vo.setToken(token);
-        vo.setUsername(account.getUsername());
+        vo.setExpire(utils.expireTime());
+        vo.setNickName(users.getNickName());
+        vo.setRealName(users.getRealName());
+        vo.setUserImg(users.getUserImg());
+        vo.setUserMobile(users.getUserMobile());
+        vo.setUserSex(users.getUserSex());
+        vo.setUserRegtime(users.getUserRegtime());
         response.getWriter().write(RestBean.success(vo).asJsonString());
     }
 

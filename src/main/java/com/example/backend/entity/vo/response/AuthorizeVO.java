@@ -6,8 +6,13 @@ import java.util.Date;
 
 @Data
 public class AuthorizeVO {
-    String username;
-    String role;
-    String token;
-    Date expire;
+    private String username;
+    private String token;
+    private Date expire;//token过期时间
+    private String nickName;
+    private String realName;
+    private String userImg;
+    private String userMobile;
+    private String userSex;
+    private Date userRegtime;
 }
